@@ -7,6 +7,7 @@ import getCAPTCHA
 import time
 import threading
 import queue
+import os
 
 
 def getImg(id):
@@ -131,7 +132,7 @@ def let_we_go(id_pre, examType, name, start, end):
             text = query(idnum, examType, name)
             if idnum in text:
                 print(result_table(text))
-                with open("result/" + name + "-" + str(idnum) + ".txt", "w") as f:
+                with open(os.path.join(result_path, name + "-" + str(idnum) + ".txt"), "w") as f:
                     f.write(result_table(text))  # 查到存成绩
                 return
 
@@ -142,14 +143,14 @@ _thread_flag = True     # 线程标志
 
 # 线程函数
 def go_thread(examType, name):
-    global _thread_flag, _queue
+    global _thread_flag, _queue, result_path
     while _thread_flag and not _queue.empty():
         try:
             idnum = _queue.get()
             text = query(idnum, examType, name)
             if idnum in text:
                 print(result_table(text))
-                with open("result/" + name + "-" + str(idnum) + ".txt", "w") as f:
+                with open(os.path.join(result_path, name + "-" + str(idnum) + ".txt"), "w") as f:
                     f.write(result_table(text))  # 查到存成绩
                     _thread_flag = False
                 return
@@ -160,7 +161,7 @@ def go_thread(examType, name):
 
 # 多线程版，这里是4线程
 def let_we_go_multi(id_pre, examType, name, start, end):
-    global _queue
+    global _queue, result_path
     for i in range(start, end + 1):
         k = str(i)
         if i < 10:
@@ -179,7 +180,7 @@ def let_we_go_multi(id_pre, examType, name, start, end):
     text = query(temp, examType, name)
     if temp in text:
         print(result_table(text))
-        with open("result/" + name + "-" + str(temp) + ".txt", "w") as f:
+        with open(os.path.join(result_path, name + "-" + str(temp) + ".txt"), "w") as f:
             f.write(result_table(text))  # 查到存成绩
         return
 
@@ -206,6 +207,10 @@ if __name__ == '__main__':
         examType = 'CET4_181_DANGCI'
     else:
         examType = 'CET6_181_DANGCI'
+
+    result_path = 'result'
+    if not os.path.exists(result_path):
+        os.makedirs(result_path)
 
     thread_num = 4  # 线程数
     # time_start1 = time.time()

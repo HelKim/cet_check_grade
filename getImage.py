@@ -5,6 +5,7 @@ from io import BytesIO
 import random
 import getCAPTCHA
 import time
+import os
 
 
 def getImg(id):
@@ -82,18 +83,18 @@ def query(id, examType, name):
 
     # 爬取的延时时间，这里是100ms，尽量设个时间，降低对服务器的压力
     time.sleep(0.01)
-    global correct, error
+    global correct, error, raw_error_path, raw_correct_path
     try:
         r = requests.post(url, data=data, headers=header)
         r.raise_for_status()
         if "验证码错误" in r.text:
             error += 1
             print(r.text)
-            im.save("raw_error2/" + code + ".png")
+            im.save(os.path.join(raw_error_path, code + ".png"))
         else:
             correct += 1
             print(id + "\t" + examType + "\r" + r.text)  # 返回id和服务器中的信息
-            im.save("raw_correct2/" + code + ".png")
+            im.save(os.path.join(raw_correct_path, code + ".png"))
         return r.text
     except Exception as e:
         print("Exception: " + repr(e))
@@ -106,6 +107,12 @@ if __name__ == '__main__':
     id_pre = "4200901811"  # 准考证号前十位
     correct = 0
     error = 0
+    raw_correct_path = 'raw_correct'
+    raw_error_path = 'raw_error'
+    if not os.path.exists(raw_correct_path):
+        os.makedirs(raw_correct_path)
+    if not os.path.exists(raw_error_path):
+        os.makedirs(raw_error_path)
 
     # 抓包拿一下自己的cookie
     cookie = ''
